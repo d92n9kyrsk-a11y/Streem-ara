@@ -21,7 +21,8 @@ function fetchPage(url,referer,method,body){
  return fetch(url,{method:method||"GET",headers:{
   "User-Agent":UA,"Accept":"text/html,application/xhtml+xml,application/json,*/*",
   "Accept-Language":"ar-EG,ar;q=0.9,en-US;q=0.8","Referer":referer||BASES[0]+"/",
-  "X-Requested-With":method==="POST"?"XMLHttpRequest":""
+  "X-Requested-With":method==="POST"?"XMLHttpRequest":"",
+  "Content-Type":method==="POST"?"application/x-www-form-urlencoded; charset=UTF-8":""
  },body:body}).then(function(r){if(!r||!r.ok)throw new Error("HTTP "+(r?r.status:"no response"));return r.text().then(function(html){return {html:html,url:r.url||url};});});
 }
 function titlesFor(id,type){
@@ -91,7 +92,7 @@ function getStreams(tmdbId,mediaType,season,episode){
      function readSeason(page){
       links(page.html,page.url).forEach(function(a){
        var n=epNo(a.title+" "+a.url);
-       if(n===episodeNum && (/allepcont|episode|الحلقة/i.test(a.html+" "+a.url))){episodePages.push(a.url);}
+       if(n===episodeNum && (/episode|الحلقة|حلقة|ep/i.test(a.title+" "+a.url))){episodePages.push(a.url);}
       });
      }
      if(seasonLinks.length){
