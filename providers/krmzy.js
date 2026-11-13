@@ -4,6 +4,8 @@
 
 var BASE_URL = "https://krmzy.net";
 var UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0 Safari/537.36";
+// Public TMDB application key fallback; override with Nuvio global key when available.
+var DEFAULT_TMDB_KEY = "8265bd1679663a7ea12ac168da84d2e8";
 
 function requestText(url) {
   return fetch(url, {
@@ -49,7 +51,7 @@ function normalize(s) {
 
 function getTitles(tmdbId, mediaType) {
   var key = (typeof globalThis !== "undefined" && globalThis.TMDB_API_KEY)
-    ? String(globalThis.TMDB_API_KEY) : "";
+    ? String(globalThis.TMDB_API_KEY) : DEFAULT_TMDB_KEY;
   if (!key) return Promise.resolve([]);
   var id = String(tmdbId || "").replace(/^(tmdb:|tv:|movie:)/i, "").split(":")[0];
   if (!/^\d+$/.test(id)) return Promise.resolve([]);
