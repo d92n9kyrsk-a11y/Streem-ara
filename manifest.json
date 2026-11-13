@@ -71,7 +71,7 @@
       "id": "shooflive",
       "name": "ShoofLive | شوف لايف",
       "description": "Arabic-subtitled series and episode servers",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "author": "Community",
       "supportedTypes": [
         "movie",
