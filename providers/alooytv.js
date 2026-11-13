@@ -48,6 +48,16 @@ function norm(s) {
 function isDubbed(s) {
   return /(?:مدبلج(?:ة|ين)?|مدبلج\s*(?:للعربية|بالعربية|مصري|سوري|فصحى)|الدبلجة|دبلجة|باللهجة\s*(?:السورية|المصرية)|اللهجة\s*(?:السورية|المصرية)|صوت\s*(?:عربي|سوري|مصري)|arabic\s*dub|syrian\s*dub|egyptian\s*dub|dubbed)/i.test(textOf(s));
 }
+function pageLabels(html) {
+  var s=String(html||""), out=[];
+  var title=s.match(/<title\b[^>]*>([\s\S]*?)<\/title>/i);
+  if(title) out.push(textOf(title[1]));
+  var h1=s.match(/<h1\b[^>]*>([\s\S]*?)<\/h1>/i);
+  if(h1) out.push(textOf(h1[1]));
+  var meta=s.match(/<meta\b[^>]*(?:name|property)\s*=\s*["'](?:description|og:title)["'][^>]*>/i);
+  if(meta) out.push(attr(meta[0],"content"));
+  return out.join(" ");
+}
 function isTranslated(s) {
   return /(?:مترجم(?:ة)?|مترجم\s*(?:للعربية|بالعربية)|بالترجمة\s*العربية|ترجمة\s*عربية|ترجمة\s*عربي|subbed|arabic\s*subtitle|with\s*arabic\s*subtitles)/i.test(textOf(s));
 }
@@ -126,8 +136,10 @@ function findSeries(html,base,titles) {
   var links=anchors(html,base), translated=null, translatedScore=0;
   links.forEach(function(x){
     // Never fall back to an unlabelled result: it may be the dubbed edition.
-    var evidence=x.title+" "+x.raw+" "+x.context;
-    if(isDubbed(evidence) || !isTranslated(evidence)) return;
+    var linkEvidence=x.title+" "+x.raw;
+    var evidence=linkEvidence+" "+x.context;
+    // A nearby card can describe a different edition; reject dubbing only on this link.
+    if(isDubbed(linkEvidence) || !isTranslated(evidence)) return;
     var best=0;
     for(var i=0;i<titles.length;i++) best=Math.max(best,score(x.title,titles[i]));
     if(best<42) return;
@@ -173,7 +185,8 @@ function getStreams(tmdbId, mediaType, season, episode) {
         var series=findSeries(p.html,p.url||base,titles);
         if(!series) return searchNext();
         return fetchText(series.url).then(function(sp){
-          if(isDubbed(sp.html) || !isTranslated(sp.html)) return searchNext();
+          var seriesLabels=pageLabels(sp.html);
+          if(isDubbed(seriesLabels) || !isTranslated(seriesLabels+" "+sp.html.slice(0,5000))) return searchNext();
           if(isMovie) return [series.url];
           var eps=episodeLinks(sp.html,sp.url||series.url,Number(episode));
           if(!eps.length) return [];
@@ -186,7 +199,8 @@ function getStreams(tmdbId, mediaType, season, episode) {
             var epUrl=pages[pidx++];
             return fetchText(epUrl).then(function(ep){
               // Require positive Arabic-subtitle evidence on the episode itself.
-              if(isDubbed(ep.html) || !isTranslated(ep.html)) return nextEpisode();
+              var episodeLabels=pageLabels(ep.html);
+              if(isDubbed(episodeLabels) || !isTranslated(episodeLabels+" "+ep.html.slice(0,5000))) return nextEpisode();
               var media=extractMedia(ep.html,ep.url||epUrl);
               media.forEach(function(u){
                 streams.push({
