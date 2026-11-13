@@ -5,8 +5,8 @@
  * Searches the site's own catalog, validates the requested episode, then
  * extracts direct HLS/MP4 URLs exposed by that episode's player page.
  */
-var Qeseh="Qeseh";
-var https://wwv.qeseh.com="https://wwv.qeseh.com";
+var SITE_NAME="Qeseh";
+var BASE_URL="https://wwv.qeseh.com";
 var PROVIDER="CVN-"+Qeseh;
 var TMDB_KEY="8265bd1679663a7ea12ac168da84d2e8";
 var UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/131.0 Safari/537.36";
@@ -35,7 +35,7 @@ function score(a,b){
  return Math.round(n/Math.max(aw.length,bw.length)*80);
 }
 function fetchPage(url,referer){
- return fetch(url,{headers:{"User-Agent":UA,"Accept":"text/html,application/xhtml+xml,application/json,*/*","Accept-Language":"ar,en;q=0.8", "Referer":referer||https://wwv.qeseh.com+"/"}})
+ return fetch(url,{headers:{"User-Agent":UA,"Accept":"text/html,application/xhtml+xml,application/json,*/*","Accept-Language":"ar,en;q=0.8", "Referer":referer||BASE_URL+"/"}})
  .then(function(r){if(!r||!r.ok)throw new Error("HTTP "+(r?r.status:"no response"));return r.text().then(function(html){return {html:html,url:r.url||url};});});
 }
 function getTitles(id,type){
@@ -107,10 +107,10 @@ function getStreams(tmdbId,mediaType,season,episode){
   function nextSearch(){
    if(idx>=titles.length)return Promise.resolve([]);
    var q=titles[idx++];
-   return fetchPage(https://wwv.qeseh.com+"/?s="+encodeURIComponent(q)).then(function(search){
+   return fetchPage(BASE_URL+"/?s="+encodeURIComponent(q)).then(function(search){
     var links=getAnchors(search.html,search.url),direct=[],series=[],seen={};
     links.forEach(function(a){
-     if(!/https?:/i.test(a.url)||a.url.indexOf(new URL(https://wwv.qeseh.com).hostname)<0||/مدبلج/i.test(a.title))return;
+     if(!/https?:/i.test(a.url)||a.url.indexOf(new URL(BASE_URL).hostname)<0||/مدبلج/i.test(a.title))return;
      var sc=0;titles.forEach(function(t){sc=Math.max(sc,score(a.title,t));});
      if(sc<45)return;
      var n=episodeNumber(a.title+" "+a.url);
@@ -140,7 +140,7 @@ function getStreams(tmdbId,mediaType,season,episode){
    function step(){
     if(i>=urls.length||streams.length>=8)return Promise.resolve(streams);
     var u=urls[i++];
-    return fetchPage(u,https://wwv.qeseh.com+"/").then(function(p){
+    return fetchPage(u,BASE_URL+"/").then(function(p){
      var heading=(p.html.match(/<h1\b[^>]*>[\s\S]*?<\/h1>/i)||[""])[0];
      if(/مدبلج/i.test(strip(heading)))return;
      var titleText=strip(heading)+" "+strip((p.html.match(/<title\b[^>]*>[\s\S]*?<\/title>/i)||[""])[0]);
