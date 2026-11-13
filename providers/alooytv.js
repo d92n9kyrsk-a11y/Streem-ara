@@ -120,21 +120,16 @@ function anchors(html, base) {
   return out;
 }
 function findSeries(html,base,titles) {
-  var links=anchors(html,base), translated=null, translatedScore=0, plain=null, plainScore=0;
+  var links=anchors(html,base), translated=null, translatedScore=0;
   links.forEach(function(x){
-    if(isDubbed(x.title)) return;
+    // Never fall back to an unlabelled result: it may be the dubbed edition.
+    if(isDubbed(x.title) || !isTranslated(x.title)) return;
     var best=0;
     for(var i=0;i<titles.length;i++) best=Math.max(best,score(x.title,titles[i]));
     if(best<42) return;
-    if(isTranslated(x.title)) {
-      if(best>translatedScore){translated=x;translatedScore=best;}
-    } else if(best>plainScore) {
-      plain=x;plainScore=best;
-    }
+    if(best>translatedScore){translated=x;translatedScore=best;}
   });
-  // Prefer an explicitly translated listing when the site publishes both
-  // translated and dubbed editions of the same Turkish series.
-  return translated || plain;
+  return translated;
 }
 function episodeLinks(html,base,wanted) {
   var links=anchors(html,base), out=[], seen={};
