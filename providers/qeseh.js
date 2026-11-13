@@ -27,7 +27,7 @@ function attr(tag,key){
 function absolute(u,b){try{return new URL(decode(u),b).href;}catch(_){return "";}}
 function norm(s){
  return strip(s).toLowerCase().replace(/[\u064b-\u065f\u0670ـ]/g,"").replace(/[أإآٱ]/g,"ا").replace(/ى/g,"ي")
- .replace(/(?:مدبلج|مترجم|الحلقة|الحلقه|حلقة|episode|ep)\s*\d*/gi," ").replace(/[^a-z0-9\u0600-\u06ff]+/g," ").trim();
+ .replace(/(?:مدبلج(?:ة)?|مترجم(?:ة)?|الحلقة|الحلقه|حلقة|حلقه|المسلسل|مسلسل|episode|ep)\s*\d*/gi," ").replace(/[^a-z0-9\u0600-\u06ff]+/g," ").trim();
 }
 function score(a,b){
  a=norm(a);b=norm(b);if(!a||!b)return 0;if(a===b)return 100;if(a.indexOf(b)>=0||b.indexOf(a)>=0)return 88;
@@ -83,7 +83,8 @@ function findEpisodePage(seriesPage,season,episode){
  var links=getAnchors(seriesPage.html,seriesPage.url),out=[],seen={};
  links.forEach(function(a){
   var n=episodeNumber(a.title+" "+a.url),cls=attr(a.tag,"class");
-  if(n===Number(episode)&&(/episode|الحلقة|حلقة|ep/i.test(a.title+" "+a.url)||/episode|btn-ep/i.test(cls))&&!seen[a.url]){seen[a.url]=1;out.push(a.url);}
+  var seasonText=a.title+" "+a.url, sm=seasonText.match(/(?:الموسم|موسم|season|s)[\s._:-]*0*(\d{1,2})/i), sn=sm?Number(sm[1]):1;
+  if(n===Number(episode)&&sn===(Number(season)||1)&&(/episode|الحلقة|الحلقه|حلقة|حلقه|ep/i.test(seasonText)||/episode|btn-ep/i.test(cls))&&!seen[a.url]){seen[a.url]=1;out.push(a.url);}
  });
  return out;
 }
@@ -152,6 +153,6 @@ function getStreams(tmdbId,mediaType,season,episode){
    return step();
   }
   return nextSearch();
- }).catch(function(e){console.log("["+Qeseh+"] "+(e&&e.message?e.message:e));return [];});
+ }).catch(function(e){console.log("["+SITE_NAME+"] "+(e&&e.message?e.message:e));return [];});
 }
 module.exports={getStreams:getStreams};
