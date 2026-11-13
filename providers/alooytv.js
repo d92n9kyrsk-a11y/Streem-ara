@@ -15,7 +15,7 @@ var BASES = [
   "https://h.alooytv16.com"
 ];
 var HUB = "https://fitnur.com/alooytv";
-var TMDB_KEY = "8265bd1679663a7ea12ac168da84e2";
+var TMDB_KEY = "8265bd1679663a7ea12ac168da84d2e8";
 var UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/131.0 Safari/537.36";
 
 function textOf(s) {
