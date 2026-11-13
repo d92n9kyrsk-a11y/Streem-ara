@@ -6,7 +6,9 @@
  * extracts direct HLS/MP4 URLs exposed by that episode's player page.
  */
 var SITE_NAME="ShoofLive";
-var BASE_URL="https://shooflive.net";
+var BASE_URL="https://shooflive.watch";
+var WORKER_TOKEN="82f6c9a1";
+function withWorker(url){try{var u=new URL(url);if(u.hostname==="shooflive.watch"&&!u.searchParams.has("__shooflive_worker"))u.searchParams.set("__shooflive_worker",WORKER_TOKEN);return u.href;}catch(_){return url;}}
 var PROVIDER="CVN-"+SITE_NAME;
 var TMDB_KEY="8265bd1679663a7ea12ac168da84d2e8";
 var UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/131.0 Safari/537.36";
@@ -36,8 +38,9 @@ function score(a,b){
 }
 function fetchPage(url,referer,attempt){
  attempt=attempt||0;
- try { var workerUrl=new URL(url); if(workerUrl.hostname==="d5.shooflive.sbs"&&!workerUrl.searchParams.has("__shooflive_worker")){workerUrl.searchParams.set("__shooflive_worker","82f6c9a1");url=workerUrl.href;} } catch (_) {}
- return fetch(url,{headers:{"User-Agent":UA,"Accept":"text/html,application/xhtml+xml,application/json,*/*","Accept-Language":"ar,en;q=0.8", "Referer":referer||BASE_URL+"/","Cache-Control":"no-cache"}})
+ url=withWorker(url);
+ referer=withWorker(referer||BASE_URL+"/");
+ return fetch(url,{headers:{"User-Agent":UA,"Accept":"text/html,application/xhtml+xml,application/json,*/*","Accept-Language":"ar,en;q=0.8", "Referer":referer,"Cache-Control":"no-cache"}})
  .then(function(r){if(!r||!r.ok)throw new Error("HTTP "+(r?r.status:"no response"));return r.text().then(function(html){if(!html||html.length<80)throw new Error("Empty response");return {html:html,url:r.url||url};});})
  .catch(function(e){if(attempt<2)return fetchPage(url,referer,attempt+1);throw e;});
 }
