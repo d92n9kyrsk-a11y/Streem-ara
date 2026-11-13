@@ -8,7 +8,7 @@
       "id": "krmzy",
       "name": "CVN-Krmzy | قرمزي",
       "description": "Turkish series and films with Arabic subtitles",
-      "version": "0.1.0",
+      "version": "0.1.2",
       "author": "Community",
       "supportedTypes": [
         "movie",
@@ -50,7 +50,7 @@
       "id": "alooytv",
       "name": "CVN-AlooyTV | علوي تي في",
       "description": "Turkish series with Arabic subtitles only; dubbed titles are excluded",
-      "version": "0.1.0",
+      "version": "0.1.2",
       "author": "Community",
       "supportedTypes": [
         "movie",
@@ -92,7 +92,7 @@
       "id": "qeseh",
       "name": "Qeseh | قصة عشق",
       "description": "Turkish series with Arabic subtitles",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "author": "Community",
       "supportedTypes": [
         "movie",
