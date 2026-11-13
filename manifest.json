@@ -1,7 +1,7 @@
 {
   "name": "Arabic Stream Providers",
   "description": "Arabic-subtitled streaming sources for Nuvio",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": "Community",
   "scrapers": [
     {
@@ -57,6 +57,68 @@
         "tv"
       ],
       "filename": "providers/alooytv.js",
+      "enabled": true,
+      "formats": [
+        "mp4",
+        "m3u8",
+        "hls"
+      ],
+      "contentLanguage": [
+        "ar"
+      ]
+    },
+    {
+      "id": "shooflive",
+      "name": "ShoofLive | شوف لايف",
+      "description": "Arabic-subtitled series and episode servers",
+      "version": "0.1.1",
+      "author": "Community",
+      "supportedTypes": [
+        "movie",
+        "tv"
+      ],
+      "filename": "providers/shooflive.js",
+      "enabled": true,
+      "formats": [
+        "mp4",
+        "m3u8",
+        "hls"
+      ],
+      "contentLanguage": [
+        "ar"
+      ]
+    },
+    {
+      "id": "qeseh",
+      "name": "Qeseh | قصة عشق",
+      "description": "Turkish series with Arabic subtitles",
+      "version": "0.1.1",
+      "author": "Community",
+      "supportedTypes": [
+        "movie",
+        "tv"
+      ],
+      "filename": "providers/qeseh.js",
+      "enabled": true,
+      "formats": [
+        "mp4",
+        "m3u8",
+        "hls"
+      ],
+      "contentLanguage": [
+        "ar"
+      ]
+    },
+    {
+      "id": "topcinema",
+      "name": "TopCinema | توب سينما",
+      "description": "Series and films with Arabic subtitles",
+      "version": "0.1.1",
+      "author": "Community",
+      "supportedTypes": [
+        "tv"
+      ],
+      "filename": "providers/topcinema.js",
       "enabled": true,
       "formats": [
         "mp4",
