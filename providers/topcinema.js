@@ -108,15 +108,20 @@ function getStreams(tmdbId,mediaType,season,episode){
       if(i>=pages.length||streams.length>=6)return Promise.resolve(streams);
       var epUrl=pages[i++],watchUrl=epUrl.replace(/\/$/,"")+"/watch/";
       return fetchPage(watchUrl,base+"/").then(function(watch){
-       var iframe=getIframeUrls(watch.html,watch.url),serverTags=watch.html.match(/<li\b[^>]*class=[\"'][^\"']*server--item[^\"']*[\"'][^>]*>/gi)||[],jobs=[];
+       var iframe=getIframeUrls(watch.html,watch.url),serverTags=watch.html.match(/<li\\b[^>]*class=["'][^"']*server--item[^"']*["'][^>]*>/gi)||[],jobs=[];
+       jobs.push(resolveEmbed(watch.url,base+"/",0,seen,streams));
        iframe.forEach(function(u){jobs.push(resolveEmbed(u,watch.url,0,seen,streams));});
        var ajaxBase=new URL(watch.url).origin+"/wp-content/themes/movies2023/Ajaxat/Single/Server.php";
+       var ajaxJobs=[];
        serverTags.forEach(function(tag){
         var id=attr(tag,"data-id"),server=attr(tag,"data-server");if(!id||!server)return;
         var body="id="+encodeURIComponent(id)+"&i="+encodeURIComponent(server);
-        jobs.push(fetchPage(ajaxBase,watch.url,"POST",body).then(function(r){getIframeUrls(r.html,r.url).forEach(function(u){jobs.push(resolveEmbed(u,watch.url,0,seen,streams));});}).catch(function(){}));
+        ajaxJobs.push(fetchPage(ajaxBase,watch.url,"POST",body).then(function(r){return getIframeUrls(r.html,r.url);}).catch(function(){return [];}));
        });
-       return Promise.all(jobs);
+       return Promise.all(ajaxJobs).then(function(groups){
+        groups.forEach(function(group){group.forEach(function(u){jobs.push(resolveEmbed(u,watch.url,0,seen,streams));});});
+        return Promise.all(jobs);
+       });
       }).catch(function(){return fetchPage(epUrl,base+"/").then(function(p){return resolveEmbed(p.url,p.url,0,seen,streams);}).catch(function(){});}).then(nextEp);
      }
      return nextEp();
