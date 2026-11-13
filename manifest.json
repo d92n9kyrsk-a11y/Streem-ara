@@ -1,0 +1,29 @@
+{
+  "name": "Arabic Stream Providers",
+  "description": "Arabic-subtitled streaming sources for Nuvio",
+  "version": "0.1.0",
+  "author": "Community",
+  "scrapers": [
+    {
+      "id": "krmzy",
+      "name": "CVN-Krmzy | قرمزي",
+      "description": "Turkish series and films with Arabic subtitles",
+      "version": "0.1.0",
+      "author": "Community",
+      "supportedTypes": [
+        "movie",
+        "tv"
+      ],
+      "filename": "providers/krmzy.js",
+      "enabled": true,
+      "formats": [
+        "mp4",
+        "m3u8",
+        "hls"
+      ],
+      "contentLanguage": [
+        "ar"
+      ]
+    }
+  ]
+}
