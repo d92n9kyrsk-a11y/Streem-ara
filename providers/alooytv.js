@@ -44,6 +44,9 @@ function norm(s) {
     .replace(/[أإآٱ]/g,"ا").replace(/ى/g,"ي")
     .replace(/[^a-z0-9\u0600-\u06ff]+/g," ").trim();
 }
+function isDubbed(s) {
+  return /(?:مدبلج(?:ة)?|مدبلجين|دبلجة|باللهجة\s+السورية|اللهجة\s+السورية|صوت\s+سوري|syrian\s+dub|dubbed)/i.test(textOf(s));
+}
 function score(a,b) {
   a=norm(a); b=norm(b);
   if(!a || !b) return 0;
@@ -115,7 +118,7 @@ function anchors(html, base) {
 function findSeries(html,base,titles) {
   var links=anchors(html,base), best=null, bestScore=0;
   links.forEach(function(x){
-    if(/مدبلج/i.test(x.title)) return;
+    if(isDubbed(x.title)) return;
     for(var i=0;i<titles.length;i++){var s=score(x.title,titles[i]);if(s>bestScore){best=x;bestScore=s;}}
   });
   return bestScore>=42?best:null;
@@ -158,6 +161,7 @@ function getStreams(tmdbId, mediaType, season, episode) {
         var series=findSeries(p.html,p.url||base,titles);
         if(!series) return searchNext();
         return fetchText(series.url).then(function(sp){
+          if(isDubbed(sp.html)) return [];
           if(isMovie) return [series.url];
           var eps=episodeLinks(sp.html,sp.url||series.url,Number(episode));
           if(!eps.length) return [];
@@ -170,8 +174,7 @@ function getStreams(tmdbId, mediaType, season, episode) {
             var epUrl=pages[pidx++];
             return fetchText(epUrl).then(function(ep){
               // A page explicitly marked dubbed is never accepted.
-              var heading=(ep.html.match(/<h1\b[^>]*>[\s\S]*?<\/h1>/i)||[""])[0];
-              if(/مدبلج/i.test(textOf(heading))) return [];
+              if(isDubbed(ep.html)) return [];
               var media=extractMedia(ep.html,ep.url||epUrl);
               media.forEach(function(u){
                 streams.push({
