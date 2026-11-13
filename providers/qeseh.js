@@ -90,7 +90,7 @@ function findEpisodePage(seriesPage,season,episode){
 function extractFromPage(page,depth,seen,streams){
  if(depth>2)return Promise.resolve();
  var urls=mediaUrls(page.html,page.url);
- urls.forEach(function(u){if(!seen[u]){seen[u]=1;streams.push({name:PROVIDER,title:Qeseh+" | "+(u.match(/\.m3u8/i)?"HLS":"MP4"),url:u,quality:"auto",language:"ar",type:u.match(/\.m3u8/i)?"hls":"mp4",headers:{"User-Agent":UA,"Referer":page.url}});}});
+ urls.forEach(function(u){if(!seen[u]){seen[u]=1;streams.push({name:PROVIDER,title:SITE_NAME+" | "+(u.match(/\.m3u8/i)?"HLS":"MP4"),url:u,quality:"auto",language:"ar",type:u.match(/\.m3u8/i)?"hls":"mp4",headers:{"User-Agent":UA,"Referer":page.url}});}});
  if(streams.length>=8)return Promise.resolve();
  var frames=page.html.match(/<iframe\b[^>]*>/gi)||[],tasks=[];
  frames.slice(0,5).forEach(function(tag){
