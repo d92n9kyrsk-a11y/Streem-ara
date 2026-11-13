@@ -34,10 +34,12 @@ function score(a,b){
  var aw=a.split(" "),bw=b.split(" "),n=0;aw.forEach(function(w){if(bw.indexOf(w)>=0)n++;});
  return Math.round(n/Math.max(aw.length,bw.length)*80);
 }
-function fetchPage(url,referer){
+function fetchPage(url,referer,attempt){
+ attempt=attempt||0;
  try { var workerUrl=new URL(url); if(workerUrl.hostname==="d5.shooflive.sbs"&&!workerUrl.searchParams.has("__shooflive_worker")){workerUrl.searchParams.set("__shooflive_worker","82f6c9a1");url=workerUrl.href;} } catch (_) {}
- return fetch(url,{headers:{"User-Agent":UA,"Accept":"text/html,application/xhtml+xml,application/json,*/*","Accept-Language":"ar,en;q=0.8", "Referer":referer||BASE_URL+"/"}})
- .then(function(r){if(!r||!r.ok)throw new Error("HTTP "+(r?r.status:"no response"));return r.text().then(function(html){return {html:html,url:r.url||url};});});
+ return fetch(url,{headers:{"User-Agent":UA,"Accept":"text/html,application/xhtml+xml,application/json,*/*","Accept-Language":"ar,en;q=0.8", "Referer":referer||BASE_URL+"/","Cache-Control":"no-cache"}})
+ .then(function(r){if(!r||!r.ok)throw new Error("HTTP "+(r?r.status:"no response"));return r.text().then(function(html){if(!html||html.length<80)throw new Error("Empty response");return {html:html,url:r.url||url};});})
+ .catch(function(e){if(attempt<2)return fetchPage(url,referer,attempt+1);throw e;});
 }
 function getTitles(id,type){
  var t=String(type||"tv").toLowerCase()==="movie"?"movie":"tv";
@@ -153,6 +155,6 @@ function getStreams(tmdbId,mediaType,season,episode){
    return step();
   }
   return nextSearch();
- }).catch(function(e){console.log("["+ShoofLive+"] "+(e&&e.message?e.message:e));return [];});
+ }).catch(function(e){console.log("["+SITE_NAME+"] "+(e&&e.message?e.message:e));return [];});
 }
 module.exports={getStreams:getStreams};
