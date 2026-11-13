@@ -46,7 +46,9 @@ function absoluteUrl(href, base) {
 function normalize(s) {
   return stripTags(s).toLowerCase()
     .replace(/[ًٌٍَُِّْـ]/g, "")
-    .replace(/[^a-z0-9\u0600-\u06ff]+/g, " ").trim();
+    .replace(/[أإآٱ]/g, "ا").replace(/ى/g, "ي")
+    .replace(/(?:المسلسل|مسلسل|الحلقة|الحلقه|حلقة|حلقه|episode|ep)\\s*\\d*/gi, " ")
+    .replace(/[^a-z0-9\\u0600-\\u06ff]+/g, " ").trim();
 }
 
 function getTitles(tmdbId, mediaType) {
@@ -142,26 +144,29 @@ function extractUrls(html, pageUrl) {
 }
 
 function getStreams(tmdbId, mediaType, season, episode) {
+  var isTv = ["tv", "series", "show"].indexOf(String(mediaType || "").toLowerCase()) >= 0;
   return getTitles(tmdbId, mediaType).then(function (titles) {
     if (!titles.length) return [];
-    var searchUrl = BASE_URL + "/?s=" + encodeURIComponent(titles[0]);
-    return requestText(searchUrl).then(function (html) {
-      var itemUrl = searchResult(html, titles);
-      if (!itemUrl) return [];
-      return requestText(itemUrl).then(function (detailHtml) {
-        var pageUrl = itemUrl;
-        if (mediaType === "tv" && episode != null) {
-          var epUrl = findEpisode(detailHtml, season, episode);
-          if (epUrl) {
-            pageUrl = epUrl;
+    var idx = 0;
+    function tryTitle() {
+      if (idx >= titles.length) return [];
+      var searchUrl = BASE_URL + "/?s=" + encodeURIComponent(titles[idx++]);
+      return requestText(searchUrl).then(function (html) {
+        var itemUrl = searchResult(html, titles);
+        if (!itemUrl) return tryTitle();
+        return requestText(itemUrl).then(function (detailHtml) {
+          if (isTv && episode != null) {
+            var epUrl = findEpisode(detailHtml, season, episode);
+            if (!epUrl) return [];
             return requestText(epUrl).then(function (epHtml) {
-              return extractUrls(epHtml, pageUrl);
+              return extractUrls(epHtml, epUrl);
             });
           }
-        }
-        return extractUrls(detailHtml, pageUrl);
-      });
-    });
+          return extractUrls(detailHtml, itemUrl);
+        });
+      }).catch(function () { return tryTitle(); });
+    }
+    return tryTitle();
   }).catch(function (e) {
     console.log("[CVN-Krmzy] " + (e && e.message ? e.message : e));
     return [];
