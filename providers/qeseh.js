@@ -7,7 +7,7 @@
  */
 var SITE_NAME="Qeseh";
 var BASE_URL="https://wwv.qeseh.com";
-var PROVIDER="CVN-"+Qeseh;
+var PROVIDER="CVN-"+SITE_NAME;
 var TMDB_KEY="8265bd1679663a7ea12ac168da84d2e8";
 var UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/131.0 Safari/537.36";
 
