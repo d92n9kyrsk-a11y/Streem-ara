@@ -6,7 +6,7 @@
  * extracts direct HLS/MP4 URLs exposed by that episode's player page.
  */
 var SITE_NAME="ShoofLive";
-var BASE_URL="https://d5.shooflive.sbs";
+var BASE_URL="https://shooflive.net";
 var PROVIDER="CVN-"+SITE_NAME;
 var TMDB_KEY="8265bd1679663a7ea12ac168da84d2e8";
 var UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/131.0 Safari/537.36";
