@@ -47,8 +47,8 @@ function normalize(s) {
   return stripTags(s).toLowerCase()
     .replace(/[ًٌٍَُِّْـ]/g, "")
     .replace(/[أإآٱ]/g, "ا").replace(/ى/g, "ي")
-    .replace(/(?:المسلسل|مسلسل|الحلقة|الحلقه|حلقة|حلقه|episode|ep)\\s*\\d*/gi, " ")
-    .replace(/[^a-z0-9\\u0600-\\u06ff]+/g, " ").trim();
+    .replace(/(?:المسلسل|مسلسل|الحلقة|الحلقه|حلقة|حلقه|episode|ep)\s*\d*/gi, " ")
+    .replace(/[^a-z0-9\u0600-\u06ff]+/g, " ").trim();
 }
 
 function getTitles(tmdbId, mediaType) {
