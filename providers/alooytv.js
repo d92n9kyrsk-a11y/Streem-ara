@@ -42,10 +42,14 @@ function norm(s) {
   return textOf(s).toLowerCase()
     .replace(/[\u064b-\u065f\u0670ـ]/g,"")
     .replace(/[أإآٱ]/g,"ا").replace(/ى/g,"ي")
+    .replace(/(?:مترجم(?:ة)?|مدبلج(?:ة)?|بالترجمة|ترجمة|دبلجة|الحلقة|الحلقه|حلقة|حلقه|episode|ep)/gi," ")
     .replace(/[^a-z0-9\u0600-\u06ff]+/g," ").trim();
 }
 function isDubbed(s) {
   return /(?:مدبلج(?:ة)?|مدبلجين|دبلجة|باللهجة\s+السورية|اللهجة\s+السورية|صوت\s+سوري|syrian\s+dub|dubbed)/i.test(textOf(s));
+}
+function isTranslated(s) {
+  return /(?:مترجم(?:ة)?|بالترجمة|ترجمة|subbed|subtitle)/i.test(textOf(s));
 }
 function score(a,b) {
   a=norm(a); b=norm(b);
@@ -116,12 +120,21 @@ function anchors(html, base) {
   return out;
 }
 function findSeries(html,base,titles) {
-  var links=anchors(html,base), best=null, bestScore=0;
+  var links=anchors(html,base), translated=null, translatedScore=0, plain=null, plainScore=0;
   links.forEach(function(x){
     if(isDubbed(x.title)) return;
-    for(var i=0;i<titles.length;i++){var s=score(x.title,titles[i]);if(s>bestScore){best=x;bestScore=s;}}
+    var best=0;
+    for(var i=0;i<titles.length;i++) best=Math.max(best,score(x.title,titles[i]));
+    if(best<42) return;
+    if(isTranslated(x.title)) {
+      if(best>translatedScore){translated=x;translatedScore=best;}
+    } else if(best>plainScore) {
+      plain=x;plainScore=best;
+    }
   });
-  return bestScore>=42?best:null;
+  // Prefer an explicitly translated listing when the site publishes both
+  // translated and dubbed editions of the same Turkish series.
+  return translated || plain;
 }
 function episodeLinks(html,base,wanted) {
   var links=anchors(html,base), out=[], seen={};
