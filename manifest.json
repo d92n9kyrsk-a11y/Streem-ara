@@ -45,6 +45,27 @@
       "contentLanguage": [
         "ar"
       ]
+    },
+    {
+      "id": "alooytv",
+      "name": "CVN-AlooyTV | علوي تي في",
+      "description": "Turkish series with Arabic subtitles only; dubbed titles are excluded",
+      "version": "0.1.0",
+      "author": "Community",
+      "supportedTypes": [
+        "movie",
+        "tv"
+      ],
+      "filename": "providers/alooytv.js",
+      "enabled": true,
+      "formats": [
+        "mp4",
+        "m3u8",
+        "hls"
+      ],
+      "contentLanguage": [
+        "ar"
+      ]
     }
   ]
 }
