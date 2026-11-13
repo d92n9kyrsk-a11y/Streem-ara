@@ -1,6 +1,6 @@
 # Arabic Stream Providers
 
-A Nuvio plugin repository focused on Arabic-subtitled sources.
+A Nuvio repository for Arabic-subtitled streaming sources, with each returned playable stream shown as a selectable server when supported by the Nuvio player.
 
 ## Install in Nuvio
 
@@ -11,14 +11,18 @@ In Nuvio, open **Settings → Content & Discovery → Plugins → Add Repository
 
 ## Providers
 
-- **Krmzy** — initial scraper; requires in-app playback validation.
-- **3isk | قصة عشق** — added using a Nuvio-compatible provider implementation; requires in-app playback validation.
+- **Krmzy** — Turkish series and films.
+- **3isk | قصة عشق** — Turkish series and films.
+- **AlooyTV** — subtitles-only results; dubbed results are filtered.
+- **ShoofLive** — searches the catalog and checks the selected episode's player page.
+- **Qeseh | قصة عشق** — searches the series and episode pages.
+- **TopCinema** — searches series, episode pages, and available watch servers.
 
 ## Validation status
 
-A provider appearing in the plugin list does not prove that it returns playable streams. Each source must be tested against a real title and episode in Nuvio. Providers that have not passed that test are not described as working.
+The manifest now registers all six provider files. ShoofLive and Qeseh also received a small runtime-reference fix. This confirms repository wiring only; it does **not** confirm that all sites return playable streams. Each provider still needs an in-app Nuvio test for the exact title, season, episode, server list, and playback.
 
 ## Notes
 
 - The repository does not host video content.
-- Playback depends on third-party site availability, embed hosts, and Nuvio runtime support.
+- Returned servers depend on source-site availability, embed hosts, and Nuvio runtime/player support.
