@@ -2,7 +2,7 @@
 // Searches the user-specified Krmzy website and extracts publicly exposed media URLs.
 // Requires Nuvio to expose TMDB_API_KEY globally for title lookup.
 
-var BASE_URL = "https://krmzy.net";
+var BASE_URLS = ["https://krmzy.co", "https://krmzy.net"];
 var UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0 Safari/537.36";
 // Public TMDB application key fallback; override with Nuvio global key when available.
 var DEFAULT_TMDB_KEY = "8265bd1679663a7ea12ac168da84d2e8";
@@ -39,7 +39,7 @@ function absoluteUrl(href, base) {
   if (/^(javascript:|mailto:|#)/i.test(href)) return "";
   if (/^https?:\/\//i.test(href)) return href;
   if (href.indexOf("//") === 0) return "https:" + href;
-  if (href.charAt(0) === "/") return BASE_URL + href;
+  if (href.charAt(0) === "/") return base.replace(/\/$/, "") + href;
   return base.replace(/\/$/, "") + "/" + href;
 }
 
@@ -78,13 +78,13 @@ function getTitles(tmdbId, mediaType) {
     }).catch(function () { return []; });
 }
 
-function searchResult(html, titles) {
+function searchResult(html, titles, baseUrl) {
   var re = /<a\b[^>]*href=["']([^"'#]+)["'][^>]*>([\s\S]*?)<\/a>/gi;
   var m, candidates = [], best = null, bestScore = 0;
   var wanted = titles.map(normalize).filter(Boolean);
   while ((m = re.exec(html)) !== null) {
-    var href = absoluteUrl(m[1], BASE_URL);
-    if (!href || href.indexOf("krmzy.net") < 0) continue;
+    var href = absoluteUrl(m[1], baseUrl);
+    if (!href || !/^https?:\/\/(?:www\.)?krmzy\.(?:co|net)\//i.test(href)) continue;
     if (/\/(category|tag|page|author|wp-content|wp-admin)\b/i.test(href)) continue;
     var label = normalize(m[2]);
     var hay = normalize(label + " " + href);
@@ -97,15 +97,15 @@ function searchResult(html, titles) {
   return best || (candidates.length === 1 ? candidates[0] : null);
 }
 
-function findEpisode(html, season, episode) {
+function findEpisode(html, season, episode, baseUrl) {
   var target = parseInt(episode, 10);
   var wantedSeason = parseInt(season, 10) || 1;
   if (!target) return null;
   var re = /<a\b[^>]*href=["']([^"'#]+)["'][^>]*>([\s\S]*?)<\/a>/gi;
   var m, fallback = null;
   while ((m = re.exec(html)) !== null) {
-    var href = absoluteUrl(m[1], BASE_URL);
-    if (!href || href.indexOf("krmzy.net") < 0) continue;
+    var href = absoluteUrl(m[1], baseUrl);
+    if (!href || !/^https?:\/\/(?:www\.)?krmzy\.(?:co|net)\//i.test(href)) continue;
     var label = stripTags(m[2]) + " " + href;
     var ep = label.match(/(?:الحلقة|الحلقه|حلقة|حلقه|episode|ep)[\s._:-]*0*(\d{1,4})(?!\d)/i);
     if (!ep || parseInt(ep[1], 10) !== target) continue;
@@ -147,26 +147,34 @@ function getStreams(tmdbId, mediaType, season, episode) {
   var isTv = ["tv", "series", "show"].indexOf(String(mediaType || "").toLowerCase()) >= 0;
   return getTitles(tmdbId, mediaType).then(function (titles) {
     if (!titles.length) return [];
-    var idx = 0;
-    function tryTitle() {
-      if (idx >= titles.length) return [];
-      var searchUrl = BASE_URL + "/?s=" + encodeURIComponent(titles[idx++]);
-      return requestText(searchUrl).then(function (html) {
-        var itemUrl = searchResult(html, titles);
-        if (!itemUrl) return tryTitle();
-        return requestText(itemUrl).then(function (detailHtml) {
-          if (isTv && episode != null) {
-            var epUrl = findEpisode(detailHtml, season, episode);
-            if (!epUrl) return [];
-            return requestText(epUrl).then(function (epHtml) {
-              return extractUrls(epHtml, epUrl);
-            });
-          }
-          return extractUrls(detailHtml, itemUrl);
-        });
-      }).catch(function () { return tryTitle(); });
+    var domainIndex = 0;
+    function tryDomain() {
+      if (domainIndex >= BASE_URLS.length) return [];
+      var baseUrl = BASE_URLS[domainIndex++];
+      var titleIndex = 0;
+      function tryTitle() {
+        if (titleIndex >= titles.length) return tryDomain();
+        var searchUrl = baseUrl + "/?s=" + encodeURIComponent(titles[titleIndex++]);
+        return requestText(searchUrl).then(function (html) {
+          var itemUrl = searchResult(html, titles, baseUrl);
+          if (!itemUrl) return tryTitle();
+          return requestText(itemUrl).then(function (detailHtml) {
+            if (isTv && episode != null) {
+              var epUrl = findEpisode(detailHtml, season, episode, baseUrl);
+              if (!epUrl) return tryTitle();
+              return requestText(epUrl).then(function (epHtml) {
+                var streams = extractUrls(epHtml, epUrl);
+                return streams.length ? streams : tryTitle();
+              });
+            }
+            var streams = extractUrls(detailHtml, itemUrl);
+            return streams.length ? streams : tryTitle();
+          });
+        }).catch(function () { return tryTitle(); });
+      }
+      return tryTitle();
     }
-    return tryTitle();
+    return tryDomain();
   }).catch(function (e) {
     console.log("[CVN-Krmzy] " + (e && e.message ? e.message : e));
     return [];
