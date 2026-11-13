@@ -1,7 +1,7 @@
 {
   "name": "Arabic Stream Providers",
   "description": "Arabic-subtitled streaming sources for Nuvio",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "author": "Community",
   "scrapers": [
     {
@@ -70,8 +70,8 @@
     {
       "id": "alooytv",
       "name": "CVN-AlooyTV | علوي تي في",
-      "description": "Turkish series with Arabic subtitles only; dubbed titles are excluded",
-      "version": "0.1.5",
+      "description": "Turkish original audio with Arabic subtitles; excludes dubbed editions",
+      "version": "0.1.6",
       "author": "Community",
       "supportedTypes": [
         "movie",
