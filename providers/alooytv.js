@@ -46,10 +46,10 @@ function norm(s) {
     .replace(/[^a-z0-9\u0600-\u06ff]+/g," ").trim();
 }
 function isDubbed(s) {
-  return /(?:مدبلج(?:ة)?|مدبلجين|دبلجة|باللهجة\s+السورية|اللهجة\s+السورية|صوت\s+سوري|syrian\s+dub|dubbed)/i.test(textOf(s));
+  return /(?:مدبلج(?:ة|ين)?|مدبلج\s*(?:للعربية|بالعربية|مصري|سوري|فصحى)|الدبلجة|دبلجة|باللهجة\s*(?:السورية|المصرية)|اللهجة\s*(?:السورية|المصرية)|صوت\s*(?:عربي|سوري|مصري)|arabic\s*dub|syrian\s*dub|egyptian\s*dub|dubbed)/i.test(textOf(s));
 }
 function isTranslated(s) {
-  return /(?:مترجم(?:ة)?|بالترجمة|ترجمة|subbed|subtitle)/i.test(textOf(s));
+  return /(?:مترجم(?:ة)?|مترجم\s*(?:للعربية|بالعربية)|بالترجمة\s*العربية|ترجمة\s*عربية|ترجمة\s*عربي|subbed|arabic\s*subtitle|with\s*arabic\s*subtitles)/i.test(textOf(s));
 }
 function score(a,b) {
   a=norm(a); b=norm(b);
@@ -115,7 +115,10 @@ function anchors(html, base) {
     var href=attr(tag,"href");
     var title=attr(tag,"title")||textOf(m[0]);
     var url=abs(href,base);
-    if(url && /\/watch\//i.test(url) && title) out.push({url:url,title:title,raw:m[0]});
+    if(url && /\/watch\//i.test(url) && title) {
+      var context=html.slice(Math.max(0,m.index-450),Math.min(html.length,m.index+m[0].length+450));
+      out.push({url:url,title:title,raw:m[0],context:context});
+    }
   }
   return out;
 }
@@ -123,7 +126,8 @@ function findSeries(html,base,titles) {
   var links=anchors(html,base), translated=null, translatedScore=0;
   links.forEach(function(x){
     // Never fall back to an unlabelled result: it may be the dubbed edition.
-    if(isDubbed(x.title) || !isTranslated(x.title)) return;
+    var evidence=x.title+" "+x.raw+" "+x.context;
+    if(isDubbed(evidence) || !isTranslated(evidence)) return;
     var best=0;
     for(var i=0;i<titles.length;i++) best=Math.max(best,score(x.title,titles[i]));
     if(best<42) return;
@@ -169,7 +173,7 @@ function getStreams(tmdbId, mediaType, season, episode) {
         var series=findSeries(p.html,p.url||base,titles);
         if(!series) return searchNext();
         return fetchText(series.url).then(function(sp){
-          if(isDubbed(sp.html)) return [];
+          if(isDubbed(sp.html) || !isTranslated(sp.html)) return searchNext();
           if(isMovie) return [series.url];
           var eps=episodeLinks(sp.html,sp.url||series.url,Number(episode));
           if(!eps.length) return [];
@@ -181,16 +185,17 @@ function getStreams(tmdbId, mediaType, season, episode) {
             if(pidx>=pages.length) return Promise.resolve(streams);
             var epUrl=pages[pidx++];
             return fetchText(epUrl).then(function(ep){
-              // A page explicitly marked dubbed is never accepted.
-              if(isDubbed(ep.html)) return [];
+              // Require positive Arabic-subtitle evidence on the episode itself.
+              if(isDubbed(ep.html) || !isTranslated(ep.html)) return nextEpisode();
               var media=extractMedia(ep.html,ep.url||epUrl);
               media.forEach(function(u){
                 streams.push({
                   name:PROVIDER+" - AlooyTV",
                   title:"AlooyTV | "+(u.match(/\.m3u8/i)?"HLS":"MP4"),
-                  url:u,quality:"auto",language:"ar",
+                  url:u,quality:"auto",language:"tr",
                   type:u.match(/\.m3u8/i)?"hls":"mp4",
-                  headers:{"User-Agent":UA,"Referer":ep.url||epUrl}
+                  headers:{"User-Agent":UA,"Referer":ep.url||epUrl},
+                  subtitles:[]
                 });
               });
               return nextEpisode();
