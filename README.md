@@ -26,3 +26,14 @@ The manifest now registers all six provider files. ShoofLive and Qeseh also rece
 
 - The repository does not host video content.
 - Returned servers depend on source-site availability, embed hosts, and Nuvio runtime/player support.
+
+
+## Additional official services (external playback)
+
+These services offer Turkish content with Arabic subtitles, but they are **not Nuvio scrapers**. They require playback on their own website/app and may require an account or subscription.
+
+- **RuvioTV** — Turkish original audio with Arabic subtitles; licensed catalog and subscription required: https://ruviotv.com/ar/musalsalat-wa-aflam
+- **tabii (TRT)** — official TRT streaming platform with Arabic among its supported languages; subtitle availability depends on the title: https://www.tabii.com/ar
+- **Netflix Saudi Arabia** — selected Turkish productions offer Turkish original audio and Arabic subtitles; availability varies by title: https://www.netflix.com/sa/
+
+Do not list these as selectable Nuvio servers unless an official, supported playback integration becomes available. The repository does not bypass account checks, subscriptions, or DRM.
