@@ -1,7 +1,7 @@
 {
   "name": "Arabic Stream Providers",
   "description": "Arabic-subtitled streaming sources for Nuvio",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "author": "Community",
   "scrapers": [
     {
@@ -71,7 +71,7 @@
       "id": "shooflive",
       "name": "ShoofLive | شوف لايف",
       "description": "Arabic-subtitled series and episode servers",
-      "version": "0.1.2",
+      "version": "0.1.3",
       "author": "Community",
       "supportedTypes": [
         "movie",
