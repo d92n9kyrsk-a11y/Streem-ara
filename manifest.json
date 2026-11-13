@@ -24,6 +24,27 @@
       "contentLanguage": [
         "ar"
       ]
+    },
+    {
+      "id": "3isk",
+      "name": "3isk | قصة عشق",
+      "description": "Turkish series and films with Arabic subtitles",
+      "version": "0.1.0",
+      "author": "Community",
+      "supportedTypes": [
+        "movie",
+        "tv"
+      ],
+      "filename": "providers/3isk.js",
+      "enabled": true,
+      "formats": [
+        "mp4",
+        "m3u8",
+        "hls"
+      ],
+      "contentLanguage": [
+        "ar"
+      ]
     }
   ]
 }
