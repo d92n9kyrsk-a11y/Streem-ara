@@ -108,7 +108,7 @@ function getStreams(tmdbId,mediaType,season,episode){
       if(i>=pages.length||streams.length>=6)return Promise.resolve(streams);
       var epUrl=pages[i++],watchUrl=epUrl.replace(/\/$/,"")+"/watch/";
       return fetchPage(watchUrl,base+"/").then(function(watch){
-       var iframe=getIframeUrls(watch.html,watch.url),serverTags=watch.html.match(/<li\\b[^>]*class=["'][^"']*server--item[^"']*["'][^>]*>/gi)||[],jobs=[];
+       var iframe=getIframeUrls(watch.html,watch.url),serverTags=watch.html.match(/<li\b[^>]*class=["'][^"']*server--item[^"']*["'][^>]*>/gi)||[],jobs=[];
        jobs.push(resolveEmbed(watch.url,base+"/",0,seen,streams));
        iframe.forEach(function(u){jobs.push(resolveEmbed(u,watch.url,0,seen,streams));});
        var ajaxBase=new URL(watch.url).origin+"/wp-content/themes/movies2023/Ajaxat/Single/Server.php";
